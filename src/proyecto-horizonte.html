@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto Horizonte</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0ece4;
+    --text2: #8a8478;
+    --text3: #4a4740;
+    --accent: #c8f065;
+    --accent2: #7effd4;
+    --accent3: #ffb347;
+    --red: #ff6b6b;
+    --card-r: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+  .mono { font-family: 'DM Mono', monospace; }
+  .serif { font-family: 'DM Serif Display', serif; }
+
+  /* HEADER */
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .header-left p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .status-text { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+
+  /* NAV */
+  nav {
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .nav-tab:hover { color: var(--text2); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  main { padding: 28px 32px; max-width: 1200px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* METRIC GRID */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .metric-card:hover { border-color: var(--border2); }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .metric-card.green::before { background: var(--accent); }
+  .metric-card.teal::before { background: var(--accent2); }
+  .metric-card.orange::before { background: var(--accent3); }
+  .metric-card.red::before { background: var(--red); }
+  .metric-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.teal { color: var(--accent2); }
+  .metric-value.orange { color: var(--accent3); }
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+  .badge.ok { background: rgba(200,240,101,0.12); color: var(--accent); }
+  .badge.pending { background: rgba(255,179,71,0.12); color: var(--accent3); }
+  .badge.missing { background: rgba(255,107,107,0.12); color: var(--red); }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #0f0f0f; font-weight: 500; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+  .btn-danger { background: transparent; border: 1px solid rgba(255,107,107,0.3); color: var(--red); }
+  .btn-danger:hover { background: rgba(255,107,107,0.1); }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+  }
+  .progress-fill.teal { background: var(--accent2); }
+  .progress-fill.orange { background: var(--accent3); }
+
+  /* CHART */
+  .chart-wrap { position: relative; width: 100%; height: 260px; }
+
+  /* OBJECTIVES */
+  .obj-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .obj-item:last-child { border-bottom: none; }
+  .obj-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+  .obj-check.done { background: var(--accent); border-color: var(--accent); }
+  .obj-check.done::after { content: '✓'; font-size: 11px; color: #0f0f0f; font-weight: 700; }
+  .obj-text { flex: 1; }
+  .obj-title { font-size: 13px; color: var(--text); margin-bottom: 3px; }
+  .obj-title.done { color: var(--text3); text-decoration: line-through; }
+  .obj-meta { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* COMPROBANTES */
+  .comp-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg3);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .comp-item:hover { background: rgba(255,255,255,0.05); }
+  .comp-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .comp-icon.hz { background: rgba(200,240,101,0.12); }
+  .comp-icon.ced { background: rgba(126,255,212,0.12); }
+  .comp-icon.bank { background: rgba(255,179,71,0.12); }
+  .comp-name { flex: 1; font-size: 13px; color: var(--text); }
+  .comp-date { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .comp-amount { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); }
+
+  /* CALENDARIO */
+  .cal-event {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cal-event:last-child { border-bottom: none; }
+  .cal-day {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--bg3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cal-day-num { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; line-height: 1; }
+  .cal-day-label { font-size: 9px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; }
+  .cal-info { flex: 1; }
+  .cal-title { font-size: 13px; color: var(--text); margin-bottom: 2px; }
+  .cal-sub { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .cal-tag { font-size: 10px; padding: 3px 9px; border-radius: 100px; font-family: 'DM Mono', monospace; }
+  .cal-tag.hz { background: rgba(200,240,101,0.1); color: var(--accent); }
+  .cal-tag.inv { background: rgba(126,255,212,0.1); color: var(--accent2); }
+  .cal-tag.fin { background: rgba(255,179,71,0.1); color: var(--accent3); }
+
+  /* PATRIMONIO */
+  .patr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .patr-row:last-child { border-bottom: none; }
+  .patr-label { font-size: 13px; color: var(--text2); }
+  .patr-value { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: #0f0f0f;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-8 { gap: 8px; }
+  .flex { display: flex; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .text-accent { color: var(--accent); }
+  .text-teal { color: var(--accent2); }
+  .text-orange { color: var(--accent3); }
+  .text-muted { color: var(--text2); }
+  .small { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Proyecto Horizonte</h1>
+    <p class="mono">GONZALO & MARIANO — VIVIENDA 2D 57m²</p>
+  </div>
+  <div class="header-right">
+    <div class="dot"></div>
+    <span class="status-text">ACTIVO — FASE 1</span>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-tab active" onclick="showSection('resumen')">Resumen</div>
+  <div class="nav-tab" onclick="showSection('aportes')">Aportes</div>
+  <div class="nav-tab" onclick="showSection('cedears')">CEDEARs</div>
+  <div class="nav-tab" onclick="showSection('patrimonio')">Patrimonio</div>
+  <div class="nav-tab" onclick="showSection('objetivos')">Objetivos</div>
+  <div class="nav-tab" onclick="showSection('calendario')">Calendario</div>
+  <div class="nav-tab" onclick="showSection('docs')">Documentos</div>
+</nav>
+
+<main>
+
+<!-- RESUMEN -->
+<div class="section active" id="sec-resumen">
+  <div class="metric-grid">
+    <div class="metric-card green">
+      <div class="metric-label">Fondo CEDEARs</div>
+      <div class="metric-value accent mono" id="res-cedears">$0</div>
+      <div class="metric-sub">Acumulado + rendimiento</div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-label">Aportado a Horizonte</div>
+      <div class="metric-value teal mono" id="res-horizonte">$0</div>
+      <div class="metric-sub">Total desde inicio</div>
+    </div>
+    <div class="metric-card orange">
+      <div class="metric-label">Meses transcurridos</div>
+      <div class="metric-value orange mono" id="res-meses">0</div>
+      <div class="metric-sub">de 60 meses planificados</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Patrimonio total</div>
+      <div class="metric-value mono" id="res-patrimonio">$0</div>
+      <div class="metric-sub">CEDEARs + Horizonte + Casa</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Progreso del plan</div>
+      <div style="margin-bottom: 16px;">
+        <div class="flex-between mb-8">
+          <span class="small text-muted">Horizonte pagado</span>
+          <span class="small mono text-accent" id="prog-hz-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-hz" style="width:0%"></div></div>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <div class="flex-between mb-8">
+          <span class="small text-muted">Tiempo transcurrido</span>
+          <span class="small mono text-teal" id="prog-time-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill teal" id="prog-time" style="width:0%"></div></div>
+      </div>
+      <div>
+        <div class="flex-between mb-8">
+          <span class="small text-muted">Meta CEDEARs ($55M)</span>
+          <span class="small mono text-orange" id="prog-ced-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill orange" id="prog-ced" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Próximos eventos</div>
+      <div id="proximos-eventos"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Crecimiento proyectado (60 meses)</div>
+    <div class="chart-wrap">
+      <canvas id="chartResumen" role="img" aria-label="Proyección de crecimiento a 60 meses"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- APORTES -->
+<div class="section" id="sec-aportes">
+  <div class="two-col mb-16">
+    <div class="card">
+      <div class="card-title">Registrar aporte</div>
+      <div class="form-row">
+        <div>
+          <label>Mes</label>
+          <input type="month" id="ap-mes" value="">
+        </div>
+        <div>
+          <label>Socio</label>
+          <select id="ap-socio">
+            <option value="gonzalo">Gonzalo</option>
+            <option value="mariano">Mariano</option>
+            <option value="ambos">Ambos</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Monto Horizonte ($)</label>
+          <input type="number" id="ap-horizonte" placeholder="50000">
+        </div>
+        <div>
+          <label>Monto CEDEARs ($)</label>
+          <input type="number" id="ap-cedears" placeholder="150000">
+        </div>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label>Notas</label>
+        <textarea id="ap-notas" placeholder="Pago realizado, comprobante guardado..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="registrarAporte()">Registrar aporte</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Resumen aportes</div>
+      <div class="patr-row">
+        <span class="patr-label">Total Gonzalo → Horizonte</span>
+        <span class="patr-value text-accent" id="ap-res-gh">$0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Total Mariano → Horizonte</span>
+        <span class="patr-value text-accent" id="ap-res-mh">$0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Total Gonzalo → CEDEARs</span>
+        <span class="patr-value text-teal" id="ap-res-gc">$0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Total Mariano → CEDEARs</span>
+        <span class="patr-value text-teal" id="ap-res-mc">$0</span>
+      </div>
+      <div class="divider"></div>
+      <div class="patr-row">
+        <span class="patr-label" style="font-weight:500; color: var(--text);">Total proyecto</span>
+        <span class="patr-value" id="ap-res-total">$0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Historial de aportes</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Socio</th>
+          <th>Horizonte</th>
+          <th>CEDEARs</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tabla-aportes">
+        <tr><td colspan="7" style="text-align:center; color: var(--text3); padding: 24px;">Sin aportes registrados aún</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CEDEARS -->
+<div class="section" id="sec-cedears">
+  <div class="metric-grid">
+    <div class="metric-card green">
+      <div class="metric-label">Capital invertido</div>
+      <div class="metric-value accent mono" id="ced-capital">$0</div>
+      <div class="metric-sub">Lo que pusieron de su bolsillo</div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-label">Ganancia estimada</div>
+      <div class="metric-value teal mono" id="ced-ganancia">$0</div>
+      <div class="metric-sub">Interés compuesto 30% anual</div>
+    </div>
+    <div class="metric-card orange">
+      <div class="metric-label">Rendimiento real</div>
+      <div class="metric-value orange mono" id="ced-rend">0%</div>
+      <div class="metric-sub">vs 30% anual objetivo</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Registrar operación</div>
+      <div class="form-row">
+        <div>
+          <label>Fecha</label>
+          <input type="date" id="ced-fecha">
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="ced-tipo">
+            <option value="compra">Compra</option>
+            <option value="venta">Venta</option>
+            <option value="dividendo">Dividendo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Ticker</label>
+          <input type="text" id="ced-ticker" placeholder="GGAL, MELI, YPF...">
+        </div>
+        <div>
+          <label>Monto ($)</label>
+          <input type="number" id="ced-monto" placeholder="150000">
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label>Notas</label>
+        <input type="text" id="ced-notas" placeholder="Precio por acción, cantidad...">
+      </div>
+      <button class="btn btn-primary" onclick="registrarCedear()">Registrar</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Rendimiento mensual</div>
+      <div class="chart-wrap" style="height: 200px;">
+        <canvas id="chartCedears" role="img" aria-label="Rendimiento mensual CEDEARs"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Historial operaciones</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Ticker</th>
+          <th>Monto</th>
+          <th>Notas</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tabla-cedears">
+        <tr><td colspan="6" style="text-align:center; color: var(--text3); padding: 24px;">Sin operaciones registradas</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PATRIMONIO -->
+<div class="section" id="sec-patrimonio">
+  <div class="metric-grid">
+    <div class="metric-card green">
+      <div class="metric-label">Patrimonio neto total</div>
+      <div class="metric-value accent mono" id="pat-neto">$0</div>
+      <div class="metric-sub">Casa + CEDEARs + Horizonte</div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-label">Por socio</div>
+      <div class="metric-value teal mono" id="pat-por-socio">$0</div>
+      <div class="metric-sub">50% / 50%</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Snapshot de patrimonio</div>
+      <div class="patr-row">
+        <span class="patr-label">Valor de la casa (Tipología 2D57)</span>
+        <span class="patr-value text-accent">$55.243.000</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Fondo CEDEARs acumulado</span>
+        <span class="patr-value text-teal" id="pat-cedears-val">$0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Total pagado Horizonte</span>
+        <span class="patr-value" id="pat-horiz-val">$0</span>
+      </div>
+      <div class="divider"></div>
+      <div class="patr-row">
+        <span class="patr-label" style="color:var(--text); font-weight:500;">Patrimonio bruto</span>
+        <span class="patr-value" id="pat-bruto">$0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label">Deuda restante estimada</span>
+        <span class="patr-value" style="color: var(--red);" id="pat-deuda">- $0</span>
+      </div>
+      <div class="patr-row">
+        <span class="patr-label" style="color:var(--text); font-weight:500;">Patrimonio neto</span>
+        <span class="patr-value text-accent" id="pat-neto2">$0</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Evolución patrimonio</div>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="chartPatrimonio" role="img" aria-label="Evolución del patrimonio neto"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>Historial snapshots</span>
+      <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px;" onclick="guardarSnapshot()">+ Guardar snapshot hoy</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Casa</th>
+          <th>CEDEARs</th>
+          <th>Horizonte pagado</th>
+          <th>Patrimonio neto</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-snapshots">
+        <tr><td colspan="5" style="text-align:center; color: var(--text3); padding: 24px;">Sin snapshots guardados</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- OBJETIVOS -->
+<div class="section" id="sec-objetivos">
+  <div class="card">
+    <div class="card-title">
+      <span>Objetivos del proyecto</span>
+      <button class="btn btn-ghost" style="font-size:12px; padding:6px 14px;" onclick="showAddObj()">+ Agregar</button>
+    </div>
+    <div id="lista-objetivos"></div>
+  </div>
+
+  <div class="card" id="form-obj" style="display:none;">
+    <div class="card-title">Nuevo objetivo</div>
+    <div class="form-row">
+      <div>
+        <label>Objetivo</label>
+        <input type="text" id="obj-titulo" placeholder="Acumular $10M en CEDEARs">
+      </div>
+      <div>
+        <label>Categoría</label>
+        <select id="obj-cat">
+          <option value="horizonte">Horizonte</option>
+          <option value="cedears">CEDEARs</option>
+          <option value="alquiler">Alquiler</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label>Fecha objetivo</label>
+      <input type="date" id="obj-fecha">
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary" onclick="agregarObjetivo()">Guardar</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('form-obj').style.display='none'">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDARIO -->
+<div class="section" id="sec-calendario">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Eventos del mes actual</div>
+      <div id="cal-mes"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Estrategia escrita</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="padding:12px; background:var(--bg3); border-radius:10px; border-left: 3px solid var(--accent);">
+          <div style="font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; margin-bottom:4px;">REGLA 1</div>
+          <div style="font-size:13px;">Pagar Horizonte siempre antes del día 10 del mes</div>
+        </div>
+        <div style="padding:12px; background:var(--bg3); border-radius:10px; border-left: 3px solid var(--accent2);">
+          <div style="font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; margin-bottom:4px;">REGLA 2</div>
+          <div style="font-size:13px;">Nunca vender CEDEARs por caídas del mercado</div>
+        </div>
+        <div style="padding:12px; background:var(--bg3); border-radius:10px; border-left: 3px solid var(--accent3);">
+          <div style="font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; margin-bottom:4px;">REGLA 3</div>
+          <div style="font-size:13px;">Reinvertir el 100% de los dividendos</div>
+        </div>
+        <div style="padding:12px; background:var(--bg3); border-radius:10px; border-left: 3px solid var(--border2);">
+          <div style="font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; margin-bottom:4px;">REGLA 4</div>
+          <div style="font-size:13px;">No tomar decisiones grandes sin consultarse entre los dos</div>
+        </div>
+        <div style="padding:12px; background:var(--bg3); border-radius:10px; border-left: 3px solid var(--red);">
+          <div style="font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; margin-bottom:4px;">REGLA 5</div>
+          <div style="font-size:13px;">No tocar el fondo de emergencia bajo ninguna circunstancia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Calendario anual de obligaciones</div>
+    <div id="cal-anual"></div>
+  </div>
+</div>
+
+<!-- DOCUMENTOS -->
+<div class="section" id="sec-docs">
+  <div class="card mb-16">
+    <div class="card-title">Agregar comprobante</div>
+    <div class="form-row">
+      <div>
+        <label>Nombre</label>
+        <input type="text" id="doc-nombre" placeholder="Recibo Horizonte Mayo 2026">
+      </div>
+      <div>
+        <label>Categoría</label>
+        <select id="doc-cat">
+          <option value="hz">Horizonte</option>
+          <option value="ced">CEDEARs</option>
+          <option value="bank">Banco</option>
+          <option value="legal">Legal</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="doc-fecha">
+      </div>
+      <div>
+        <label>Monto ($)</label>
+        <input type="number" id="doc-monto" placeholder="100000">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="agregarDoc()">Agregar comprobante</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>Carpeta de documentos</span>
+    </div>
+    <div id="lista-docs">
+      <div style="text-align:center; color: var(--text3); padding: 24px; font-family:'DM Mono',monospace; font-size:13px;">Sin documentos cargados aún</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// STATE
+let state = {
+  aportes: [],
+  cedears: [],
+  objetivos: [
+    { id:1, titulo: 'Acumular fondos para adjudicación', cat:'horizonte', fecha:'2031-01-01', done:false },
+    { id:2, titulo: 'Tener 3 meses de cuota como reserva', cat:'general', fecha:'2026-12-31', done:false },
+    { id:3, titulo: 'Alquilar la casa dentro de los 30 días de entrega', cat:'alquiler', fecha:'2031-06-01', done:false },
+    { id:4, titulo: 'Alcanzar $20M en CEDEARs', cat:'cedears', fecha:'2028-01-01', done:false },
+    { id:5, titulo: 'No tocar el fondo de inversión', cat:'cedears', fecha:'2031-01-01', done:false },
+  ],
+  docs: [],
+  snapshots: [],
+};
+
+// HELPERS
+function fmt(n) {
+  if (!n) return '$0';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  return '$' + Math.round(n).toLocaleString('es-AR');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'resumen') renderResumen();
+  if (id === 'patrimonio') renderPatrimonio();
+  if (id === 'objetivos') renderObjetivos();
+  if (id === 'calendario') renderCalendario();
+  if (id === 'cedears') renderCedears();
+}
+
+// CALC
+function calcCedears() {
+  const capitalInv = state.aportes.reduce((a, x) => a + (x.cedears || 0), 0);
+  const meses = state.aportes.length;
+  const rendMensual = Math.pow(1.30, 1/12) - 1;
+  let fondo = 0;
+  state.aportes.forEach(ap => { fondo = fondo * (1 + rendMensual) + (ap.cedears || 0); });
+  const ganancia = fondo - capitalInv;
+  const rendReal = capitalInv > 0 ? ((ganancia / capitalInv) * 100).toFixed(1) : 0;
+  return { capitalInv, fondo, ganancia, rendReal, meses };
+}
+function calcHorizonte() {
+  return state.aportes.reduce((a, x) => a + (x.horizonte || 0), 0);
+}
+
+// PROYECCION
+function proyeccion60() {
+  const rendMensual = Math.pow(1.30, 1/12) - 1;
+  let fondo = 0;
+  const data = [];
+  for (let m = 1; m <= 60; m++) {
+    fondo = fondo * (1 + rendMensual) + 300000;
+    data.push({ mes: m, ced: Math.round(fondo), horiz: m * 100000 });
+  }
+  return data;
+}
+
+// RESUMEN
+let chartRes = null;
+function renderResumen() {
+  const ced = calcCedears();
+  const horiz = calcHorizonte();
+  const meses = state.aportes.length;
+  const casa = 55243000;
+  const patrimonio = ced.fondo + horiz + casa;
+
+  document.getElementById('res-cedears').textContent = fmt(ced.fondo);
+  document.getElementById('res-horizonte').textContent = fmt(horiz);
+  document.getElementById('res-meses').textContent = meses;
+  document.getElementById('res-patrimonio').textContent = fmt(patrimonio);
+
+  const pctHz = Math.min(100, Math.round((horiz / (100000*60))*100));
+  const pctTime = Math.min(100, Math.round((meses / 60)*100));
+  const pctCed = Math.min(100, Math.round((ced.fondo / 55243000)*100));
+  document.getElementById('prog-hz').style.width = pctHz + '%';
+  document.getElementById('prog-hz-pct').textContent = pctHz + '%';
+  document.getElementById('prog-time').style.width = pctTime + '%';
+  document.getElementById('prog-time-pct').textContent = pctTime + '%';
+  document.getElementById('prog-ced').style.width = pctCed + '%';
+  document.getElementById('prog-ced-pct').textContent = pctCed + '%';
+
+  // Próximos eventos
+  const now = new Date();
+  const day = now.getDate();
+  const eventos = [
+    { dia: 5, label: 'Día financiero mensual', tag: 'fin', urgente: day >= 1 && day <= 5 },
+    { dia: 10, label: 'Pago cuota Horizonte', tag: 'hz', urgente: day >= 6 && day <= 10 },
+    { dia: 15, label: 'Compra CEDEARs del mes', tag: 'inv', urgente: day >= 11 && day <= 15 },
+  ];
+  document.getElementById('proximos-eventos').innerHTML = eventos.map(e => `
+    <div class="cal-event">
+      <div class="cal-day" style="${e.urgente ? 'background:rgba(200,240,101,0.1); border: 1px solid rgba(200,240,101,0.3)' : ''}">
+        <span class="cal-day-num" style="${e.urgente ? 'color:var(--accent)' : ''}">${e.dia}</span>
+        <span class="cal-day-label">cada mes</span>
+      </div>
+      <div class="cal-info">
+        <div class="cal-title">${e.label}</div>
+        <div class="cal-sub">${e.urgente ? '⚡ Esta semana' : 'Recurrente'}</div>
+      </div>
+      <span class="cal-tag ${e.tag}">${e.tag === 'hz' ? 'Horizonte' : e.tag === 'inv' ? 'Inversión' : 'Financiero'}</span>
+    </div>
+  `).join('');
+
+  // Chart
+  const proj = proyeccion60();
+  const labels = proj.filter((_, i) => i % 5 === 4).map(d => 'M' + d.mes);
+  const cedData = proj.filter((_, i) => i % 5 === 4).map(d => d.ced);
+  const horData = proj.filter((_, i) => i % 5 === 4).map(d => d.horiz);
+  if (chartRes) { chartRes.destroy(); }
+  chartRes = new Chart(document.getElementById('chartResumen').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'CEDEARs', data: cedData, borderColor: '#c8f065', backgroundColor: 'rgba(200,240,101,0.06)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#c8f065' },
+        { label: 'Horizonte', data: horData, borderColor: '#7effd4', backgroundColor: 'rgba(126,255,212,0.04)', fill: true, tension: 0.4, pointRadius: 3, borderDash: [5,4], pointBackgroundColor: '#7effd4' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => { if(v>=1e6) return '$'+(v/1e6).toFixed(0)+'M'; return '$'+Math.round(v/1000)+'K'; }, color: '#4a4740', font:{size:11} }, grid: { color: 'rgba(255,255,255,0.04)' }, border:{color:'transparent'} },
+        x: { ticks: { color: '#4a4740', font:{size:11} }, grid: { display: false }, border:{color:'transparent'} }
+      }
+    }
+  });
+}
+
+// APORTES
+function registrarAporte() {
+  const mes = document.getElementById('ap-mes').value;
+  const socio = document.getElementById('ap-socio').value;
+  const horizonte = parseFloat(document.getElementById('ap-horizonte').value) || 0;
+  const cedears = parseFloat(document.getElementById('ap-cedears').value) || 0;
+  const notas = document.getElementById('ap-notas').value;
+  if (!mes) { showToast('Seleccioná el mes'); return; }
+  if (!horizonte && !cedears) { showToast('Ingresá al menos un monto'); return; }
+  state.aportes.push({ mes, socio, horizonte, cedears, notas, id: Date.now() });
+  state.aportes.sort((a,b) => a.mes.localeCompare(b.mes));
+  renderTablaAportes();
+  renderResumenAportes();
+  document.getElementById('ap-horizonte').value = '';
+  document.getElementById('ap-cedears').value = '';
+  document.getElementById('ap-notas').value = '';
+  showToast('Aporte registrado ✓');
+}
+function renderTablaAportes() {
+  const tbody = document.getElementById('tabla-aportes');
+  if (!state.aportes.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text3); padding: 24px;">Sin aportes registrados aún</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.aportes.map(a => `
+    <tr>
+      <td>${a.mes}</td>
+      <td style="text-transform:capitalize;">${a.socio}</td>
+      <td class="text-teal">${fmt(a.horizonte)}</td>
+      <td class="text-accent">${fmt(a.cedears)}</td>
+      <td>${fmt(a.horizonte + a.cedears)}</td>
+      <td><span class="badge ok">Pagado</span></td>
+      <td><button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="eliminarAporte(${a.id})">×</button></td>
+    </tr>
+  `).join('');
+}
+function eliminarAporte(id) {
+  state.aportes = state.aportes.filter(a => a.id !== id);
+  renderTablaAportes();
+  renderResumenAportes();
+  showToast('Aporte eliminado');
+}
+function renderResumenAportes() {
+  const gh = state.aportes.filter(a=>a.socio==='gonzalo'||a.socio==='ambos').reduce((s,a)=>s+(a.horizonte||0),0);
+  const mh = state.aportes.filter(a=>a.socio==='mariano'||a.socio==='ambos').reduce((s,a)=>s+(a.horizonte||0),0);
+  const gc = state.aportes.filter(a=>a.socio==='gonzalo'||a.socio==='ambos').reduce((s,a)=>s+(a.cedears||0),0);
+  const mc = state.aportes.filter(a=>a.socio==='mariano'||a.socio==='ambos').reduce((s,a)=>s+(a.cedears||0),0);
+  document.getElementById('ap-res-gh').textContent = fmt(gh);
+  document.getElementById('ap-res-mh').textContent = fmt(mh);
+  document.getElementById('ap-res-gc').textContent = fmt(gc);
+  document.getElementById('ap-res-mc').textContent = fmt(mc);
+  document.getElementById('ap-res-total').textContent = fmt(gh+mh+gc+mc);
+}
+
+// CEDEARS
+let chartCed = null;
+function registrarCedear() {
+  const fecha = document.getElementById('ced-fecha').value;
+  const tipo = document.getElementById('ced-tipo').value;
+  const ticker = document.getElementById('ced-ticker').value;
+  const monto = parseFloat(document.getElementById('ced-monto').value) || 0;
+  const notas = document.getElementById('ced-notas').value;
+  if (!fecha || !ticker || !monto) { showToast('Completá todos los campos'); return; }
+  state.cedears.push({ fecha, tipo, ticker: ticker.toUpperCase(), monto, notas, id: Date.now() });
+  state.cedears.sort((a,b) => a.fecha.localeCompare(b.fecha));
+  renderCedears();
+  document.getElementById('ced-ticker').value = '';
+  document.getElementById('ced-monto').value = '';
+  document.getElementById('ced-notas').value = '';
+  showToast('Operación registrada ✓');
+}
+function renderCedears() {
+  const ced = calcCedears();
+  document.getElementById('ced-capital').textContent = fmt(ced.capitalInv);
+  document.getElementById('ced-ganancia').textContent = fmt(ced.ganancia);
+  document.getElementById('ced-rend').textContent = ced.rendReal + '%';
+
+  const tbody = document.getElementById('tabla-cedears');
+  if (!state.cedears.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text3); padding: 24px;">Sin operaciones registradas</td></tr>';
+  } else {
+    tbody.innerHTML = state.cedears.map(c => `
+      <tr>
+        <td>${c.fecha}</td>
+        <td><span class="badge ${c.tipo==='compra'?'ok':c.tipo==='dividendo'?'pending':'missing'}">${c.tipo}</span></td>
+        <td style="font-weight:500;">${c.ticker}</td>
+        <td class="text-accent">${fmt(c.monto)}</td>
+        <td style="color:var(--text2);">${c.notas || '—'}</td>
+        <td><button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="eliminarCedear(${c.id})">×</button></td>
+      </tr>
+    `).join('');
+  }
+
+  // Chart rendimiento
+  const proj = proyeccion60();
+  const labels = proj.filter((_,i)=>i%5===4).map(d=>'M'+d.mes);
+  const data = proj.filter((_,i)=>i%5===4).map(d=>Math.round(d.ced));
+  if (chartCed) chartCed.destroy();
+  chartCed = new Chart(document.getElementById('chartCedears').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'CEDEARs', data, backgroundColor: 'rgba(200,240,101,0.2)', borderColor: '#c8f065', borderWidth: 1, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => { if(v>=1e6) return '$'+(v/1e6).toFixed(0)+'M'; return '$'+Math.round(v/1000)+'K'; }, color:'#4a4740', font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}, border:{color:'transparent'}},
+        x: { ticks:{color:'#4a4740',font:{size:10}}, grid:{display:false}, border:{color:'transparent'}}
+      }
+    }
+  });
+}
+function eliminarCedear(id) {
+  state.cedears = state.cedears.filter(c => c.id !== id);
+  renderCedears();
+  showToast('Operación eliminada');
+}
+
+// PATRIMONIO
+let chartPat = null;
+function renderPatrimonio() {
+  const ced = calcCedears();
+  const horiz = calcHorizonte();
+  const casa = 55243000;
+  const deuda = Math.max(0, 55243000 - horiz);
+  const bruto = ced.fondo + horiz + casa;
+  const neto = bruto - deuda;
+
+  document.getElementById('pat-cedears-val').textContent = fmt(ced.fondo);
+  document.getElementById('pat-horiz-val').textContent = fmt(horiz);
+  document.getElementById('pat-bruto').textContent = fmt(bruto);
+  document.getElementById('pat-deuda').textContent = '- ' + fmt(deuda);
+  document.getElementById('pat-neto').textContent = fmt(neto);
+  document.getElementById('pat-neto2').textContent = fmt(neto);
+  document.getElementById('pat-por-socio').textContent = fmt(neto / 2);
+
+  // snapshots chart
+  const tbody = document.getElementById('tabla-snapshots');
+  if (!state.snapshots.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text3); padding: 24px;">Sin snapshots guardados</td></tr>';
+  } else {
+    tbody.innerHTML = state.snapshots.map(s => `
+      <tr>
+        <td>${s.fecha}</td>
+        <td>$55.243.000</td>
+        <td class="text-accent">${fmt(s.cedears)}</td>
+        <td class="text-teal">${fmt(s.horiz)}</td>
+        <td style="font-weight:500;">${fmt(s.neto)}</td>
+      </tr>
+    `).join('');
+  }
+
+  if (chartPat) chartPat.destroy();
+  const patData = state.snapshots.map(s => Math.round(s.neto));
+  const patLabels = state.snapshots.map(s => s.fecha);
+  chartPat = new Chart(document.getElementById('chartPatrimonio').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: patLabels.length ? patLabels : ['Hoy'],
+      datasets: [{ label: 'Patrimonio', data: patData.length ? patData : [neto], borderColor: '#c8f065', backgroundColor: 'rgba(200,240,101,0.07)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#c8f065' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => { if(v>=1e6) return '$'+(v/1e6).toFixed(0)+'M'; return '$'+Math.round(v/1000)+'K'; }, color:'#4a4740', font:{size:11}}, grid:{color:'rgba(255,255,255,0.04)'}, border:{color:'transparent'}},
+        x: { ticks:{color:'#4a4740',font:{size:11}}, grid:{display:false}, border:{color:'transparent'}}
+      }
+    }
+  });
+}
+function guardarSnapshot() {
+  const ced = calcCedears();
+  const horiz = calcHorizonte();
+  const casa = 55243000;
+  const deuda = Math.max(0, 55243000 - horiz);
+  const neto = ced.fondo + horiz + casa - deuda;
+  const fecha = new Date().toLocaleDateString('es-AR');
+  state.snapshots.push({ fecha, cedears: ced.fondo, horiz, neto });
+  renderPatrimonio();
+  showToast('Snapshot guardado ✓');
+}
+
+// OBJETIVOS
+function renderObjetivos() {
+  const catColor = { horizonte: 'teal', cedears: 'green', alquiler: 'orange', general: '' };
+  document.getElementById('lista-objetivos').innerHTML = state.objetivos.map(o => `
+    <div class="obj-item">
+      <div class="obj-check ${o.done ? 'done' : ''}" onclick="toggleObj(${o.id})"></div>
+      <div class="obj-text">
+        <div class="obj-title ${o.done ? 'done' : ''}">${o.titulo}</div>
+        <div class="obj-meta">${o.cat.toUpperCase()} · Objetivo: ${o.fecha || 'Sin fecha'}</div>
+      </div>
+      <button class="btn btn-danger" style="font-size:11px;padding:4px 10px;" onclick="eliminarObj(${o.id})">×</button>
+    </div>
+  `).join('') || '<div style="color:var(--text3);padding:20px;text-align:center;font-family:DM Mono,monospace;font-size:13px;">Sin objetivos</div>';
+}
+function toggleObj(id) {
+  const o = state.objetivos.find(x => x.id === id);
+  if (o) { o.done = !o.done; renderObjetivos(); }
+}
+function eliminarObj(id) {
+  state.objetivos = state.objetivos.filter(x => x.id !== id);
+  renderObjetivos();
+}
+function showAddObj() {
+  document.getElementById('form-obj').style.display = 'block';
+}
+function agregarObjetivo() {
+  const titulo = document.getElementById('obj-titulo').value;
+  const cat = document.getElementById('obj-cat').value;
+  const fecha = document.getElementById('obj-fecha').value;
+  if (!titulo) { showToast('Ingresá un objetivo'); return; }
+  state.objetivos.push({ id: Date.now(), titulo, cat, fecha, done: false });
+  document.getElementById('form-obj').style.display = 'none';
+  document.getElementById('obj-titulo').value = '';
+  renderObjetivos();
+  showToast('Objetivo agregado ✓');
+}
+
+// CALENDARIO
+function renderCalendario() {
+  const eventos = [
+    { dia: 5, label: 'Día financiero mensual', sub: 'Revisar cuota, CEDEARs, rendimientos', tag: 'fin' },
+    { dia: 10, label: 'Pago cuota Horizonte', sub: '$50.000 cada uno → Horizonte', tag: 'hz' },
+    { dia: 15, label: 'Compra CEDEARs del mes', sub: '$150.000 cada uno → CEDEARs', tag: 'inv' },
+  ];
+  document.getElementById('cal-mes').innerHTML = eventos.map(e => `
+    <div class="cal-event">
+      <div class="cal-day">
+        <span class="cal-day-num">${e.dia}</span>
+        <span class="cal-day-label">c/mes</span>
+      </div>
+      <div class="cal-info">
+        <div class="cal-title">${e.label}</div>
+        <div class="cal-sub">${e.sub}</div>
+      </div>
+      <span class="cal-tag ${e.tag}">${e.tag === 'hz' ? 'Horizonte' : e.tag === 'inv' ? 'CEDEARs' : 'Financiero'}</span>
+    </div>
+  `).join('');
+
+  const trimestrales = [
+    { mes: 'Marzo', label: 'Snapshot de patrimonio trimestral', tag: 'fin' },
+    { mes: 'Junio', label: 'Snapshot de patrimonio trimestral', tag: 'fin' },
+    { mes: 'Septiembre', label: 'Snapshot de patrimonio trimestral', tag: 'fin' },
+    { mes: 'Diciembre', label: 'Snapshot de patrimonio + revisión anual', tag: 'inv' },
+  ];
+  document.getElementById('cal-anual').innerHTML = trimestrales.map(t => `
+    <div class="cal-event">
+      <div class="cal-day" style="width:60px;">
+        <span class="cal-day-num" style="font-size:13px;">${t.mes.substring(0,3).toUpperCase()}</span>
+      </div>
+      <div class="cal-info">
+        <div class="cal-title">${t.label}</div>
+        <div class="cal-sub">Medir, comparar vs proyección y ajustar si es necesario</div>
+      </div>
+      <span class="cal-tag ${t.tag}">${t.tag === 'fin' ? 'Patrimonio' : 'Anual'}</span>
+    </div>
+  `).join('');
+}
+
+// DOCS
+function agregarDoc() {
+  const nombre = document.getElementById('doc-nombre').value;
+  const cat = document.getElementById('doc-cat').value;
+  const fecha = document.getElementById('doc-fecha').value;
+  const monto = parseFloat(document.getElementById('doc-monto').value) || 0;
+  if (!nombre) { showToast('Ingresá un nombre'); return; }
+  state.docs.push({ nombre, cat, fecha, monto, id: Date.now() });
+  renderDocs();
+  document.getElementById('doc-nombre').value = '';
+  document.getElementById('doc-monto').value = '';
+  showToast('Comprobante agregado ✓');
+}
+function renderDocs() {
+  const catIcon = { hz: '🏠', ced: '📈', bank: '🏦', legal: '📄' };
+  const catLabel = { hz: 'Horizonte', ced: 'CEDEARs', bank: 'Banco', legal: 'Legal' };
+  if (!state.docs.length) {
+    document.getElementById('lista-docs').innerHTML = '<div style="text-align:center; color: var(--text3); padding: 24px; font-family:DM Mono,monospace; font-size:13px;">Sin documentos cargados aún</div>';
+    return;
+  }
+  document.getElementById('lista-docs').innerHTML = state.docs.map(d => `
+    <div class="comp-item" onclick="void(0)">
+      <div class="comp-icon ${d.cat}">${catIcon[d.cat]}</div>
+      <div class="comp-name">
+        <div>${d.nombre}</div>
+        <div style="font-size:11px; color:var(--text3); font-family:'DM Mono',monospace;">${catLabel[d.cat]} · ${d.fecha || 'Sin fecha'}</div>
+      </div>
+      ${d.monto ? `<span class="comp-amount">${fmt(d.monto)}</span>` : ''}
+      <button class="btn btn-danger" style="font-size:11px;padding:4px 10px;margin-left:8px;" onclick="event.stopPropagation();eliminarDoc(${d.id})">×</button>
+    </div>
+  `).join('');
+}
+function eliminarDoc(id) {
+  state.docs = state.docs.filter(d => d.id !== id);
+  renderDocs();
+  showToast('Documento eliminado');
+}
+
+// INIT
+const now = new Date();
+const mesActual = now.toISOString().substring(0,7);
+document.getElementById('ap-mes').value = mesActual;
+document.getElementById('ced-fecha').value = now.toISOString().substring(0,10);
+document.getElementById('doc-fecha').value = now.toISOString().substring(0,10);
+renderResumen();
+renderResumenAportes();
+</script>
+</body>
+</html>
