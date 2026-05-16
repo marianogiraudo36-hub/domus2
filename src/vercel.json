@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-=======
 
->>>>>>> ce49c74f091ca5e7262a30dae5ff4725baba52af
-{
 "rewrites": [
   {
     "source": "/(.*)",
